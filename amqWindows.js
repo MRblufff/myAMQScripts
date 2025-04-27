@@ -24,8 +24,6 @@ class AMQWindow {
                 left: (data.position?.x ?? 0) + "px",
                 width: "auto",
                 height: "auto",
-                maxWidth: "90vw",
-                maxHeight: "90vh",
             });
 
         this.content = $(`<div class="customWindowContent"></div>`);
