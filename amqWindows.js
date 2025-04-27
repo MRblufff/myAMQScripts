@@ -130,7 +130,7 @@ function windowSetup() {
         .customWindow .close {
             font-size: 28px;
             cursor: pointer;
-            position: absolute;
+            position: relative;
             top: 10px;
             right: 10px;
         }
