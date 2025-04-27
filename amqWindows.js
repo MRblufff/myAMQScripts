@@ -1,46 +1,56 @@
-// ==UserScript==
-// @name         AMQ Auto-Resize Window
-// @namespace    your-namespace
-// @version      1.0
-// @description  Custom AMQ Window that resizes automatically based on its content
-// @match        https://animemusicquiz.com/*
-// @grant        none
-// ==/UserScript==
+// AMQ Window Script (Auto Resize Version)
+// This code is fetched automatically
+// Do not attempt to add it to tampermonkey
 
 if (typeof Listener === "undefined") return;
 windowSetup();
 
 class AMQWindow {
     constructor(data) {
-        this.id = data.id || "";
-        this.title = data.title || "Window";
-        this.draggable = data.draggable || false;
-        this.position = data.position || { x: 0, y: 0 };
-        this.zIndex = data.zIndex || 1060;
+        this.id = data.id ?? "";
+        this.title = data.title ?? "Window";
+        this.draggable = data.draggable ?? false;
+        this.zIndex = data.zIndex ?? 1060;
+        this.closeHandler = data.closeHandler ?? function () {};
 
         this.window = $("<div></div>")
             .addClass("customWindow")
-            .addClass(data.class || "")
+            .addClass(data.class ?? "")
             .attr("id", this.id)
             .css({
                 position: "absolute",
                 zIndex: this.zIndex,
-                top: this.position.y,
-                left: this.position.x
+                top: (data.position?.y ?? 0) + "px",
+                left: (data.position?.x ?? 0) + "px",
+                width: "auto",
+                height: "auto",
+                maxWidth: "90vw",
+                maxHeight: "90vh",
             });
 
-        this.content = $("<div class='customWindowContent'></div>");
-
-        this.header = $("<div class='modal-header customWindowHeader'></div>")
+        this.content = $(`<div class="customWindowContent"></div>`);
+        this.header = $("<div></div>")
+            .addClass("modal-header customWindowHeader")
             .addClass(this.draggable ? "draggableWindow" : "")
-            .append($("<div class='close' type='button'><span aria-hidden='true'>&times;</span></div>").click(() => this.close()))
-            .append($("<h2 class='modal-title'></h2>").text(this.title));
+            .append(
+                $("<div class='close' type='button'><span aria-hidden='true'>×</span></div>")
+                .click(() => this.close(this.closeHandler))
+            )
+            .append(
+                $("<h2></h2>").addClass("modal-title").text(this.title)
+            );
 
-        this.body = $("<div class='modal-body customWindowBody'></div>");
+        this.body = $(`<div class="modal-body customWindowBody"></div>`)
+            .css({
+                width: "100%",
+                height: "auto",
+                overflowY: "auto",
+                maxHeight: "80vh"
+            });
 
-        this.content.append(this.header).append(this.body);
+        this.content.append(this.header);
+        this.content.append(this.body);
         this.window.append(this.content);
-        $("#gameContainer").append(this.window);
 
         if (this.draggable) {
             this.window.draggable({
@@ -48,11 +58,13 @@ class AMQWindow {
                 containment: "#gameContainer"
             });
         }
+
+        $("#gameContainer").append(this.window);
     }
 
     setId(newId) {
         this.id = newId;
-        this.window.attr("id", newId);
+        this.window.attr("id", this.id);
     }
 
     setTitle(newTitle) {
@@ -62,7 +74,7 @@ class AMQWindow {
 
     setZIndex(newZIndex) {
         this.zIndex = newZIndex;
-        this.window.css("z-index", this.zIndex);
+        this.window.css("z-index", this.zIndex.toString());
     }
 
     isVisible() {
@@ -73,35 +85,34 @@ class AMQWindow {
         this.body.children().remove();
     }
 
-    open() {
+    open(handler) {
         this.window.show();
+        if (handler) handler();
     }
 
-    close() {
+    close(handler) {
         this.window.hide();
-    }
-
-    addContent(element) {
-        this.body.append(element);
+        if (handler) handler();
     }
 }
 
 function windowSetup() {
     if ($("#customWindowStyle").length) return;
-
     const style = document.createElement("style");
     style.type = "text/css";
     style.id = "customWindowStyle";
     style.appendChild(document.createTextNode(`
         .customWindow {
+            overflow: visible;
             background-color: #424242;
             border: 1px solid rgba(27, 27, 27, 0.2);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             user-select: text;
             display: none;
-            max-width: 90vw;
-            max-height: 90vh;
-            overflow: auto;
+            padding: 10px;
+        }
+        .customWindowHeader {
+            cursor: default;
         }
         .draggableWindow {
             cursor: move;
@@ -110,15 +121,18 @@ function windowSetup() {
             width: 100%;
             height: auto;
             overflow-y: auto;
-            max-height: 80vh;
+            padding-top: 10px;
         }
         .customWindowContent {
             width: 100%;
             position: relative;
         }
         .customWindow .close {
-            font-size: 32px;
+            font-size: 28px;
             cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
     `));
     document.head.appendChild(style);
