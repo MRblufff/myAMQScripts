@@ -1,4 +1,4 @@
-// AMQ Window Script (Auto Resize Version Improved)
+// AMQ Window Script (Auto-Append Improved Version)
 // Do not add to Tampermonkey manually
 
 if (typeof Listener === "undefined") return;
@@ -11,6 +11,7 @@ class AMQWindow {
         this.draggable = data.draggable ?? false;
         this.zIndex = data.zIndex ?? 1060;
         this.closeHandler = data.closeHandler ?? (() => {});
+        this.created = false; // <-- เพิ่มตัวแปรไว้เช็คว่าถูกโยนเข้า DOM หรือยัง
 
         this.window = $("<div>", {
             id: this.id,
@@ -36,7 +37,6 @@ class AMQWindow {
             .append(this.header, this.body);
 
         this.window.append(this.content);
-        $("#gameContainer").append(this.window);
 
         if (this.draggable) {
             this.window.draggable({
@@ -70,6 +70,10 @@ class AMQWindow {
     }
 
     open(handler) {
+        if (!this.created) {
+            $("#gameContainer").append(this.window);
+            this.created = true;
+        }
         this.window.show();
         handler?.();
     }
@@ -81,6 +85,7 @@ class AMQWindow {
 
     destroy() {
         this.window.remove();
+        this.created = false;
     }
 }
 
