@@ -45,7 +45,6 @@ class AMQWindow {
                 width: "100%",
                 height: "auto",
                 overflowY: "auto",
-                maxHeight: "80vh"
             });
 
         this.content.append(this.header);
