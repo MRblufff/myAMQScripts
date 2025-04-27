@@ -18,7 +18,7 @@ class AMQWindow {
             .addClass(data.class ?? "")
             .attr("id", this.id)
             .css({
-                position: "absolute",
+                position: "relative",
                 zIndex: this.zIndex,
                 top: (data.position?.y ?? 0) + "px",
                 left: (data.position?.x ?? 0) + "px",
