@@ -1,4 +1,4 @@
-// AMQ Window Script (Auto-Append Improved Version)
+// AMQ Window Script (Final Improved Version)
 // Do not add to Tampermonkey manually
 
 if (typeof Listener === "undefined") return;
@@ -11,7 +11,7 @@ class AMQWindow {
         this.draggable = data.draggable ?? false;
         this.zIndex = data.zIndex ?? 1060;
         this.closeHandler = data.closeHandler ?? (() => {});
-        this.created = false; // <-- เพิ่มตัวแปรไว้เช็คว่าถูกโยนเข้า DOM หรือยัง
+        this.created = false;
 
         this.window = $("<div>", {
             id: this.id,
@@ -24,18 +24,19 @@ class AMQWindow {
                 width: "auto",
                 height: "auto",
                 display: "none",
-            },
+            }
         });
 
-        this.header = $("<div>", { class: `modal-header customWindowHeader ${this.draggable ? "draggableWindow" : ""}` })
-            .append($("<h2>", { class: "modal-title", text: this.title }))
-            .append($("<button>", { class: "close", html: "&times;" }).click(() => this.close(this.closeHandler)));
+        this.header = $("<div>", {
+            class: `modal-header customWindowHeader ${this.draggable ? "draggableWindow" : ""}`
+        }).append(
+            $("<h2>", { class: "modal-title", text: this.title }),
+            $("<button>", { class: "close", html: "&times;" }).on("click", () => this.close(this.closeHandler))
+        );
 
         this.body = $("<div>", { class: "modal-body customWindowBody" });
 
-        this.content = $("<div>", { class: "customWindowContent" })
-            .append(this.header, this.body);
-
+        this.content = $("<div>", { class: "customWindowContent" }).append(this.header, this.body);
         this.window.append(this.content);
 
         if (this.draggable) {
@@ -74,16 +75,15 @@ class AMQWindow {
             $("#gameContainer").append(this.window);
             this.created = true;
         }
-        this.window.show();
-        handler?.();
+        this.window.show(0, handler); // show แล้วค่อย call handler
     }
 
     close(handler) {
-        this.window.hide();
-        handler?.();
+        this.window.hide(0, handler); // hide แล้วค่อย call handler
     }
 
     destroy() {
+        this.window.off(); // remove all events to prevent memory leak
         this.window.remove();
         this.created = false;
     }
@@ -130,6 +130,6 @@ function windowSetup() {
                 cursor: pointer;
                 color: #fff;
             }
-        `,
+        `
     }).appendTo("head");
 }
